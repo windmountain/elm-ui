@@ -1,4 +1,7 @@
-module Element.Keyed exposing (el, column, row)
+module Element.Keyed exposing
+    ( el, column, row
+    , reverseColumn
+    )
 
 {-| Notes from the `Html.Keyed` on how keyed works:
 
@@ -47,6 +50,24 @@ row attrs children =
         (Internal.htmlClass (classes.contentLeft ++ " " ++ classes.contentCenterY)
             :: width shrink
             :: height shrink
+            :: attrs
+        )
+        (Internal.Keyed children)
+
+
+{-| -}
+reverseColumn : List (Attribute msg) -> List ( String, Element msg ) -> Element msg
+reverseColumn attrs children =
+    Internal.element
+        Internal.asReverseColumn
+        Internal.div
+        (Internal.htmlClass
+            (classes.contentTop
+                ++ " "
+                ++ classes.contentLeft
+            )
+            :: height shrink
+            :: width shrink
             :: attrs
         )
         (Internal.Keyed children)

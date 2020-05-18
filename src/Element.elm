@@ -22,6 +22,7 @@ module Element exposing
     , modular
     , map, mapAttribute
     , html, htmlAttribute
+    , reverseColumn
     )
 
 {-|
@@ -599,6 +600,24 @@ row attrs children =
 {-| -}
 column : List (Attribute msg) -> List (Element msg) -> Element msg
 column attrs children =
+    Internal.element
+        Internal.asColumn
+        Internal.div
+        (Internal.htmlClass
+            (classes.contentTop
+                ++ " "
+                ++ classes.contentLeft
+            )
+            :: height shrink
+            :: width shrink
+            :: attrs
+        )
+        (Internal.Unkeyed children)
+
+
+{-| -}
+reverseColumn : List (Attribute msg) -> List (Element msg) -> Element msg
+reverseColumn attrs children =
     Internal.element
         Internal.asColumn
         Internal.div

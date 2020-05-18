@@ -135,6 +135,7 @@ classes =
     , single = "e"
     , row = "r"
     , column = "c"
+    , reverseColumn = "reverseColumn"
     , page = "pg"
     , paragraph = "p"
     , text = "t"
@@ -367,6 +368,7 @@ single =
     , single = "e"
     , row = "r"
     , column = "c"
+    , reverseColumn = "reverseColumn"
     , page = "l"
     , paragraph = "p"
     , text = "t"
@@ -1354,6 +1356,129 @@ baseSheet =
                             )
 
             -- Must be below the alignment rules or else it interferes
+            , Descriptor (dot classes.spaceEvenly)
+                [ Prop "justify-content" "space-between"
+                ]
+            ]
+        , Descriptor (dot classes.reverseColumn)
+            [ Prop "display" "flex"
+            , Prop "flex-direction" "column-reverse"
+            , Child (dot classes.any)
+                -- *Note* - While rows have flex-basis 0%,
+                -- which allows for the children of a row to default to their content size
+                -- This apparently is a different story for columns.
+                -- Safari has an issue if this is flex-basis: 0%, as it goes entirely to 0,
+                -- instead of the expected content size.
+                [ Prop "flex-basis" "auto"
+                ]
+            , Child (dot classes.heightFill)
+                [ Prop "flex-grow" "100000"
+                ]
+            , Child (dot classes.widthFill)
+                [ -- alignLeft, alignRight, centerX need to be disabled
+                  --   Prop "align-self" "stretch !important"
+                  Prop "width" "100%"
+                ]
+            , Child (dot classes.widthFillPortion)
+                [ -- alignLeft, alignRight, centerX need to be disabled
+                  --   Prop "align-self" "stretch !important"
+                  Prop "width" "100%"
+                ]
+
+            -- TODO:: This might be necessary, maybe it should move to widthFill?
+            -- , Child (dot classes.widthFill)
+            --     [ Prop "align-self" "stretch"
+            --     , Descriptor (dot classes.alignedHorizontally)
+            --         [ Prop "width" "100%"
+            --         ]
+            --     ]
+            , Child (dot classes.widthContent)
+                [ Prop "align-self" "flex-start"
+                ]
+
+            -- , Child "alignTop:last-of-type.align-container-top"
+            --     [ Prop "flex-grow" "1"
+            --     ]
+            , Child ("u:first-of-type." ++ classes.alignContainerBottom)
+                [ Prop "flex-grow" "1"
+                ]
+
+            -- centerY -> <s>
+            -- alignBottom -> <u>
+            -- first center y
+            , Child ("s:first-of-type." ++ classes.alignContainerCenterY)
+                [ Prop "flex-grow" "1"
+                , Child (dot classes.alignCenterY)
+                    [ Prop "margin-top" "auto !important"
+                    , Prop "margin-bottom" "0 !important"
+                    ]
+                ]
+            , Child ("s:last-of-type." ++ classes.alignContainerCenterY)
+                [ Prop "flex-grow" "1"
+                , Child (dot classes.alignCenterY)
+                    [ Prop "margin-bottom" "auto !important"
+                    , Prop "margin-top" "0 !important"
+                    ]
+                ]
+
+            -- lonley centerY
+            , Child ("s:only-of-type." ++ classes.alignContainerCenterY)
+                [ Prop "flex-grow" "1"
+                , Child (dot classes.alignCenterY)
+                    [ Prop "margin-top" "auto !important"
+                    , Prop "margin-bottom" "auto !important"
+                    ]
+                ]
+
+            -- alignBottom's after a centerY should not grow
+            , Child ("s:last-of-type." ++ classes.alignContainerCenterY ++ " ~ u")
+                [ Prop "flex-grow" "0"
+                ]
+
+            -- centerY's after an alignBottom should be ignored
+            , Child ("u:first-of-type." ++ classes.alignContainerBottom ++ " ~ s." ++ classes.alignContainerCenterY)
+                -- Bottom alignment always overrides center alignment
+                [ Prop "flex-grow" "0"
+                ]
+            , describeAlignment <|
+                \alignment ->
+                    case alignment of
+                        Top ->
+                            ( [ Prop "justify-content" "flex-start" ]
+                            , [ Prop "margin-bottom" "auto" ]
+                            )
+
+                        Bottom ->
+                            ( [ Prop "justify-content" "flex-end" ]
+                            , [ Prop "margin-top" "auto" ]
+                            )
+
+                        Right ->
+                            ( [ Prop "align-items" "flex-end" ]
+                            , [ Prop "align-self" "flex-end" ]
+                            )
+
+                        Left ->
+                            ( [ Prop "align-items" "flex-start" ]
+                            , [ Prop "align-self" "flex-start" ]
+                            )
+
+                        CenterX ->
+                            ( [ Prop "align-items" "center" ]
+                            , [ Prop "align-self" "center"
+                              ]
+                            )
+
+                        CenterY ->
+                            ( [ Prop "justify-content" "center" ]
+                            , []
+                            )
+            , Child (dot classes.container)
+                [ Prop "flex-grow" "0"
+                , Prop "flex-basis" "auto"
+                , Prop "width" "100%"
+                , Prop "align-self" "stretch !important"
+                ]
             , Descriptor (dot classes.spaceEvenly)
                 [ Prop "justify-content" "space-between"
                 ]

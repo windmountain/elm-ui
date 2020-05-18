@@ -40,6 +40,7 @@ module Internal.Model exposing
     , asEl
     , asGrid
     , asParagraph
+    , asReverseColumn
     , asRow
     , asTextColumn
     , boxShadowClass
@@ -90,6 +91,7 @@ module Internal.Model exposing
     , renderRoot
     , renderVariant
     , renderWidth
+    , reverseColumnClass
     , rootStyle
     , rowClass
     , singleClass
@@ -140,6 +142,7 @@ noStyleSheet =
 type LayoutContext
     = AsRow
     | AsColumn
+    | AsReverseColumn
     | AsEl
     | AsGrid
     | AsParagraph
@@ -497,6 +500,39 @@ finalizeNode has node attributes children embedMode parentContext =
                 html
 
         AsColumn ->
+            if Flag.present Flag.heightFill has && not (Flag.present Flag.heightBetween has) then
+                html
+
+            else if Flag.present Flag.centerY has then
+                Html.s
+                    [ Html.Attributes.class
+                        (String.join " "
+                            [ classes.any
+                            , classes.single
+                            , classes.container
+                            , classes.alignContainerCenterY
+                            ]
+                        )
+                    ]
+                    [ html ]
+
+            else if Flag.present Flag.alignBottom has then
+                Html.u
+                    [ Html.Attributes.class
+                        (String.join " "
+                            [ classes.any
+                            , classes.single
+                            , classes.container
+                            , classes.alignContainerBottom
+                            ]
+                        )
+                    ]
+                    [ html ]
+
+            else
+                html
+
+        AsReverseColumn ->
             if Flag.present Flag.heightFill has && not (Flag.present Flag.heightBetween has) then
                 html
 
@@ -1514,6 +1550,10 @@ columnClass =
     classes.any ++ " " ++ classes.column
 
 
+reverseColumnClass =
+    classes.any ++ " " ++ classes.reverseColumn
+
+
 singleClass =
     classes.any ++ " " ++ classes.single
 
@@ -1537,6 +1577,9 @@ contextClasses context =
 
         AsColumn ->
             columnClass
+
+        AsReverseColumn ->
+            reverseColumnClass
 
         AsEl ->
             singleClass
@@ -3306,6 +3349,11 @@ asGrid =
 asRow : LayoutContext
 asRow =
     AsRow
+
+
+asReverseColumn : LayoutContext
+asReverseColumn =
+    AsReverseColumn
 
 
 asColumn : LayoutContext
